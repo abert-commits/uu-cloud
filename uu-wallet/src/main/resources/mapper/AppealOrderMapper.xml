@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.wallet.mapper.AppealOrderMapper">
+
+    <select id="queryAppealOrderByOrderNo" resultType="org.uu.wallet.entity.AppealOrder">
+        select
+        create_time AS createTime,
+        reason,
+        pic_info AS picInfo,
+        video_url AS videoUrl
+        from appeal_order
+        <if test="appealType == 1">
+            where withdraw_order_no = #{orderNo}
+        </if>
+        <if test="appealType == 2">
+            where recharge_order_no = #{orderNo}
+        </if>
+    </select>
+
+    <select id="queryAppealOrderByNo" resultType="org.uu.wallet.entity.AppealOrder">
+        SELECT
+            *
+        FROM
+            appeal_order
+        WHERE
+            recharge_order_no = #{orderNo}
+           OR withdraw_order_no = #{orderNo}
+    </select>
+
+    <select id="selectAppealNum" resultType="org.uu.wallet.entity.AppealOrder">
+        SELECT
+            IFNULL( count( 1 ), 0 ) as orderAmount,
+            appeal_status as appealStatus
+        FROM
+            appeal_order
+            where  DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+              and (appeal_status = 2 or appeal_status = 3)
+        GROUP BY
+            appeal_status
+    </select>
+
+    <select id="selectWrongAmountNum" resultType="java.lang.Long">
+        SELECT
+            IFNULL( count( 1 ), 0 )
+        FROM
+            appeal_order
+        WHERE
+            appeal_type = #{appealType} and (display_appeal_type = 2 or reason = 'Incorrect Amount')
+          and (appeal_status = 2 or appeal_status = 3)
+          AND DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+    </select>
+
+    <select id="selectAppealTotalNum" resultType="java.lang.Long">
+        select
+            IFNULL(count(1),0)
+        from appeal_order
+        where appeal_type = #{appealType} and DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+    </select>
+</mapper>

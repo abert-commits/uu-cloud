@@ -1,0 +1,33 @@
+server:
+  port: 20000
+  shutdown: graceful  # 启用优雅停机
+spring:
+  tomcat:
+    graceful-shutdown:
+      timeout: 60s  # 设置优雅停机超时时间
+  lifecycle:
+    timeout-per-shutdown-phase: 60s  # 设置优雅停机超时时间
+  shutdown: graceful  # 启用优雅停机
+  application:
+    name: uu-gateway
+  cloud:
+    nacos:
+      # 注册中心
+      username: @nacosUserName@
+      password: @nacosPassword@
+      discovery:
+        namespace: @nacosNamespace@
+        server-addr: @nacosAddress@
+      # 配置中心
+      config:
+        namespace: @nacosNamespace@
+        server-addr: ${spring.cloud.nacos.discovery.server-addr}
+        file-extension: yaml
+        shared-configs[0]:
+          data-id: uu-common.yaml
+          refresh: true
+        username: @nacosUserName@
+        password: @nacosPassword@
+logging:
+  file:
+    name: /var/log/javalog/uu-gateway-current.log

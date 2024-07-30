@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.wallet.mapper.MerchantInfoMapper">
+    <resultMap id="BaseResultMap" type="org.uu.wallet.entity.MerchantInfo">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="nickname" column="nickname" jdbcType="VARCHAR"/>
+
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
+        <result property="mobile" column="mobile" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="BOOLEAN"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="deleted" column="deleted" jdbcType="BOOLEAN"/>
+        <collection property="roles" ofType="string" javaType="list">
+            <result column="roleCode"></result>
+        </collection>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id
+        ,username,nickname,
+                gender,password,
+                avatar,mobile,status,
+                email,
+                deleted
+    </sql>
+
+    <resultMap id="MerchantAuthMap" type="org.uu.common.pay.dto.UserAuthDTO">
+        <id property="userId" column="userId" jdbcType="BIGINT"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="BOOLEAN"/>
+        <result property="googlesecret" column="googlesecret" jdbcType="VARCHAR"/>
+        <result property="isBindGoogle" column="isBindGoogle" jdbcType="VARCHAR"/>
+        <collection property="roles" ofType="string" javaType="list">
+            <result column="roleCode"></result>
+        </collection>
+    </resultMap>
+
+
+    <select id="getByMerchantCode" resultMap="MerchantAuthMap">
+        select t1.id                userId,
+               t1.username,
+               t1.googlesecret,
+               t1.nickname,
+               t1.password,
+               t1.status,
+               'merchant'        as roleCode,
+               t1.is_bind_google as isBindGoogle
+        from merchant_info t1
+
+        where t1.code = #{merchantCode}
+          and t1.deleted = 0
+    </select>
+
+    <select id="getMerchantInfoById" resultType="org.uu.wallet.entity.MerchantInfo">
+        select *
+        from merchant_info
+        where code = #{code} for update
+    </select>
+
+    <select id="getMerchantInfoByCode" resultType="org.uu.wallet.entity.MerchantInfo">
+        select *
+        from merchant_info
+        where code = #{code}
+    </select>
+
+    <update id="updateBalanceByCode" parameterType="org.uu.wallet.entity.MerchantInfo">
+        update merchant_info
+        set balance = #{balance}
+        where code = #{code}
+    </update>
+
+    <update id="updateMerchantPwd">
+        update merchant_info
+        set password      = #{password},
+            password_tips = #{passwordTips},
+            update_time   = Now()
+        where id = #{id}
+    </update>
+
+    <update id="updateUsdtAddress">
+        update merchant_info
+        set usdt_address = #{usdtAddress},
+            update_time  = Now()
+        where id = #{id}
+    </update>
+
+    <select id="getMerchantName" resultType="java.util.Map">
+    </select>
+
+    <update id="updateMerchantPublicKey">
+        update merchant_info
+        set merchant_public_key = #{merchantPublicKey},
+            update_time         = Now()
+        where id = #{id}
+    </update>
+
+    <update id="updateMerchantGoogleSecretKey">
+        update merchant_info
+        set googlesecret   = #{newGoogleSecretKey},
+            update_time    = Now(),
+            is_bind_google = #{flag}
+        where code = #{merchantCode}
+    </update>
+
+    <update id="updateUserGoogelBindFlag">
+        update merchant_info
+        set is_bind_google = #{flag},
+            update_time    = Now()
+        where id = #{id}
+    </update>
+
+    <select id="calcActiveNum" resultType="org.uu.common.pay.dto.MerchantActivationInfoDTO">
+        SELECT count(merchant_code) as totalActivationNum,
+               merchant_code        as merchantCode,
+               merchant_name        as merchantName,
+               '' as 'dateTime'
+        from member_info
+        WHERE merchant_code IS NOT NULL
+        GROUP BY merchant_code,
+                 merchant_name
+
+        union
+
+        SELECT count(merchant_code) as totalActivationNum,
+               merchant_code        as merchantCode,
+               merchant_name        as merchantName,
+               #{dateTime} as 'dateTime'
+        from member_info
+        WHERE merchant_code IS NOT NULL
+          and DATE_FORMAT(create_time, '%Y-%m-%d') = #{dateTime}
+        GROUP BY merchant_code,
+                 merchant_name
+    </select>
+</mapper>

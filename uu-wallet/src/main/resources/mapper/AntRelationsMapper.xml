@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.wallet.mapper.AntRelationsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="org.uu.wallet.entity.AntRelations">
+        <id column="ant_id" property="antId"/>
+        <result column="left_value" property="leftValue"/>
+        <result column="right_value" property="rightValue"/>
+        <result column="ant_level" property="antLevel"/>
+        <result column="tree_flag" property="treeFlag"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        ant_id AS antId, left_value AS leftValue, right_value AS rightValue, ant_level AS antLevel, tree_flag AS treeFlag
+    </sql>
+
+    <update id="updateRValueWhenUpdate">
+        UPDATE
+            r_ant_relations
+        SET
+            right_value = right_value + 2
+        WHERE
+            right_value &gt;= #{parentRValue}
+        AND
+            tree_flag = #{treeFlag};
+    </update>
+
+    <update id="updateLValueWhenUpdate">
+        UPDATE
+            r_ant_relations
+        SET
+            left_value = left_value + 2
+        WHERE
+            left_value &gt;= #{parentRValue}
+        AND
+            tree_flag = #{treeFlag};
+    </update>
+
+    <select id="selectChildList" resultType="org.uu.wallet.entity.AntRelations">
+        SELECT
+            <include refid="Base_Column_List" />
+        FROM
+            r_ant_relations
+        WHERE
+            left_value &gt; #{leftValue}
+        AND
+            right_value &lt; #{rightValue}
+        AND
+            tree_flag = #{treeFlag}
+        AND
+            ant_level = #{level};
+    </select>
+
+    <select id="selectParentList" resultType="org.uu.wallet.entity.AntRelations">
+        SELECT
+            <include refid="Base_Column_List" />
+        FROM
+            r_ant_relations
+        WHERE
+            left_value &lt; #{leftValue}
+        AND
+            right_value &gt; #{rightValue}
+        AND
+            tree_flag = #{treeFlag};
+    </select>
+    <select id="selectParentByCount" resultType="org.uu.wallet.entity.AntRelations">
+        SELECT
+            <include refid="Base_Column_List" />
+        FROM
+            r_ant_relations
+        WHERE
+            left_value &lt; #{leftValue}
+        AND
+            right_value &gt; #{rightValue}
+        AND
+            tree_flag = #{treeFlag}
+        AND
+            ant_level = #{level};
+    </select>
+    <select id="querySuperParent" resultType="org.uu.wallet.entity.AntRelations">
+        SELECT
+            <include refid="Base_Column_List" />
+        FROM
+            r_ant_relations
+        WHERE
+            tree_flag = #{treeFlag}
+        AND
+            ant_level = 0;
+    </select>
+
+    <select id="selectChildByCount" resultType="org.uu.wallet.entity.AntRelations">
+        SELECT
+            <include refid="Base_Column_List" />
+        FROM
+            r_ant_relations
+        WHERE
+            left_value &gt; #{leftValue}
+        AND
+            right_value &lt; #{rightValue}
+        AND
+            tree_flag = #{treeFlag}
+        AND
+            ant_level = #{level};
+    </select>
+
+    <select id="rangeChildByCountIncludeMe" resultType="org.uu.wallet.entity.AntRelations">
+        SELECT
+            <include refid="Base_Column_List" />
+        FROM
+            r_ant_relations
+        WHERE
+            left_value &gt;= #{leftValue}
+        AND
+            right_value &lt;= #{rightValue}
+        AND
+            tree_flag = #{treeFlag}
+        AND
+            ant_level &lt;= #{level};
+    </select>
+
+    <select id="rangeChildByCount" resultType="org.uu.wallet.entity.AntRelations">
+        SELECT
+            <include refid="Base_Column_List" />
+        FROM
+            r_ant_relations
+        WHERE
+            left_value &gt; #{leftValue}
+        AND
+            right_value &lt; #{rightValue}
+        AND
+            tree_flag = #{treeFlag}
+        AND
+            ant_level &lt;= #{level}
+        AND
+            ant_level &gt; #{currentLevel};
+    </select>
+
+</mapper>

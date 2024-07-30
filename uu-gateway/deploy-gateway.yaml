@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: uu-gateway-deployment
+  name: uu-gateway-deployment
+  namespace: uu-cloud
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uu-gateway-deployment
+  strategy: { }
+  template:
+    metadata:
+      labels:
+        app: uu-gateway-deployment
+    spec:
+      # 拉取镜像需要使用到的secret
+      imagePullSecrets:
+        - name: ar-image-account-secret
+      containers:
+        - env:
+            # 运行时环境，引用一开始创建的configmap，值为prod
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: spring-profile-cm
+                  key: spring-profiles-active
+            # 设置一些jvm调优参数
+            - name: JAVA_OPTION
+              value: "-Dfile.encoding=UTF-8 -XX:+UseParallelGC -XX:+PrintGCDetails -Xloggc:/var/log/devops-example.gc.log -XX:+HeapDumpOnOutOfMemoryError -XX:+DisableExplicitGC"
+            - name: XMX
+              value: "64m"
+            - name: XMS
+              value: "64m"
+            - name: XMN
+              value: "32m"
+          image: registry-vpc.cn-shenzhen.aliyuncs.com/yueyang-cloud/gateway:1.0.0
+          name: gateway
+          # 存活探针
+          livenessProbe:
+            # 发送http get请求到8080端口的/actuator/health路径检查pod是否健康
+            httpGet:
+              path: /actuator/health
+              port: 8080
+              scheme: HTTP
+            # pod初始化完毕20秒之后再开始
+            initialDelaySeconds: 20
+            # 之后每10秒进行一次健康检查
+            periodSeconds: 10
+          ports:
+            - containerPort: 8080
+          resources: { }
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: uu-gateway-deployment
+  name: uu-gateway-svc
+  namespace: uu-cloud
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: uu-gateway-deployment
+  type: ClusterIP

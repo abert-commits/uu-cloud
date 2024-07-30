@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.manager.mapper.BiMerchantDailyMapper">
+
+    <update id="updateByDateTime">
+        INSERT INTO bi_merchant_daily (
+        date_time,
+        merchant_code,
+        merchant_name,
+        pay_money,
+        pay_order_num,
+        pay_success_order_num,
+        create_time,
+        update_time,
+        merchant_type,
+        total_fee,
+        difference
+        )
+        VALUES
+        (
+        #{vo.dateTime},
+        #{vo.merchantCode},
+        #{vo.merchantName},
+        #{vo.payMoney},
+        #{vo.payOrderNum},
+        #{vo.paySuccessOrderNum},
+        now(),
+        now(),
+        #{vo.merchantType},
+        #{vo.totalFee},
+        #{vo.difference}
+        )
+        ON DUPLICATE KEY UPDATE
+        pay_money = pay_money + #{vo.payMoney},
+        pay_order_num = pay_order_num + #{vo.payOrderNum},
+        pay_success_order_num = pay_success_order_num + #{vo.paySuccessOrderNum},
+        total_fee = total_fee + #{vo.totalFee},
+        difference = difference + #{vo.difference},
+        update_time = now()
+        <if test="vo.lastMinute != null and vo.lastMinute != ''">
+            ,last_minute = #{vo.lastMinute}
+        </if>
+    </update>
+
+    <delete id="deleteDailyByDateTime">
+        DELETE from bi_merchant_daily where date_time = #{dateTime}
+    </delete>
+
+    <update id="updateWithdrawByDateTime">
+        INSERT INTO bi_merchant_daily (
+        date_time,
+        merchant_code,
+        merchant_name,
+        withdraw_money,
+        withdraw_order_num,
+        withdraw_success_order_num,
+        create_time,
+        update_time,
+        merchant_type,
+        total_fee,
+        difference
+        )
+        VALUES
+        (
+        #{vo.dateTime},
+        #{vo.merchantCode},
+        #{vo.merchantName},
+        #{vo.withdrawMoney},
+        #{vo.withdrawOrderNum},
+        #{vo.withdrawSuccessOrderNum},
+        now(),
+        now(),
+        #{vo.merchantType},
+        #{vo.totalFee},
+        #{vo.difference}
+        )
+        ON DUPLICATE KEY UPDATE
+        withdraw_money = withdraw_money + #{vo.withdrawMoney},
+        withdraw_order_num = withdraw_order_num + #{vo.withdrawOrderNum},
+        withdraw_success_order_num = withdraw_success_order_num + #{vo.withdrawSuccessOrderNum},
+        total_fee = total_fee + #{vo.totalFee},
+        difference = difference - #{vo.difference},
+        update_time = now()
+        <if test="vo.lastMinute != null and vo.lastMinute != ''">
+            ,last_minute = #{vo.lastMinute}
+        </if>
+    </update>
+
+    <select id="selectInfoByDate" resultType="org.uu.manager.entity.BiMerchantDaily">
+        SELECT * from bi_merchant_daily where date_time = #{dateTime}
+    </select>
+</mapper>

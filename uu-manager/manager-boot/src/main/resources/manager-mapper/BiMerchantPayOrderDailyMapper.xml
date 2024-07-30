@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.manager.mapper.BiMerchantPayOrderDailyMapper">
+    <select id="selectPaymentOrderList" resultType="org.uu.manager.entity.BiMerchantPayOrderDaily">
+        SELECT
+            *
+        FROM
+            `bi_merchant_pay_order_daily`
+        WHERE
+            DATE_FORMAT(create_time,'%Y-%m-%d') = #{dateStr}
+            create_time <![CDATA[>=]]> #{startTime}
+          AND create_time <![CDATA[<]]> #{endTime}
+            limit #{star}, #{end}
+    </select>
+
+    <update id="updateByDateTime">
+        INSERT INTO bi_merchant_pay_order_daily (
+        date_time,
+        money,
+        actual_money,
+        order_num,
+        success_order_num,
+        total_fee,
+        create_time,
+        update_time,
+        last_minute,
+        cancel_pay,
+        cancel_order,
+        appeal_num,
+        finish_duration,
+        merchant_code,
+        merchant_name,
+        merchant_type
+        )
+        VALUES
+        (
+        #{vo.dateTime},
+        #{vo.money},
+        #{vo.actualMoney},
+        #{vo.orderNum},
+        #{vo.successOrderNum},
+        #{vo.totalFee},
+        now(),
+        now(),
+        #{vo.lastMinute},
+        #{vo.cancelPay},
+        #{vo.cancelOrder},
+        #{vo.appealNum},
+        #{vo.finishDuration},
+        #{vo.merchantCode},
+        #{vo.merchantName},
+        #{vo.merchantType}
+        )
+        ON DUPLICATE KEY UPDATE
+        money = money + #{vo.money},
+        actual_money = actual_money + #{vo.actualMoney},
+        order_num = order_num + #{vo.orderNum},
+        success_order_num = success_order_num + #{vo.successOrderNum},
+        total_fee = total_fee + #{vo.totalFee},
+        cancel_pay = cancel_pay + #{vo.cancelPay},
+        cancel_order = cancel_order + #{vo.cancelOrder},
+        appeal_num = appeal_num + #{vo.appealNum},
+        finish_duration = finish_duration + #{vo.finishDuration},
+        update_time = now()
+        <if test="vo.lastMinute != null and vo.lastMinute != ''">
+            ,last_minute = #{vo.lastMinute}
+        </if>
+    </update>
+
+    <delete id="deleteDailyByDateTime">
+        DELETE from bi_merchant_pay_order_daily where date_time = #{dateTime}
+    </delete>
+</mapper>

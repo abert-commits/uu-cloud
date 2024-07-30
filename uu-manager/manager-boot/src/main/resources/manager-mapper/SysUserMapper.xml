@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.manager.mapper.SysUserMapper">
+
+    <resultMap id="BaseResultMap" type="org.uu.manager.entity.SysUser">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="nickname" column="nickname" jdbcType="VARCHAR"/>
+        <result property="gender" column="gender" jdbcType="BOOLEAN"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
+        <result property="mobile" column="mobile" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="BOOLEAN"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="deleted" column="deleted" jdbcType="BOOLEAN"/>
+        <collection property="roles" ofType="string" javaType="list">
+            <result column="roleCode"></result>
+        </collection>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id
+        ,username,nickname,
+                gender,password,dept_id,
+                avatar,mobile,status,
+                email,gmt_create,gmt_modified,
+                deleted
+    </sql>
+
+    <resultMap id="UserAuthMap" type="org.uu.common.pay.dto.UserAuthDTO">
+        <id property="userId" column="userId" jdbcType="BIGINT"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="BOOLEAN"/>
+        <result property="googlesecret" column="googlesecret" jdbcType="VARCHAR"/>
+        <result property="isBindGoogle" column="isBindGoogle" jdbcType="VARCHAR"/>
+        <collection property="roles" ofType="string" javaType="list">
+            <result column="roleCode"></result>
+        </collection>
+    </resultMap>
+
+    <select id="getByUsername" resultMap="UserAuthMap">
+        select t1.id userId, t1.username, t1.nickname, t1.password, t1.status, t3.code roleCode, t1.googlesecret,t1.is_bind_google as isBindGoogle
+        from sys_user t1,
+             sys_user_role t2,
+             sys_role t3
+        where t1.username = #{userName}
+          and t1.deleted = 0
+          and t1.status = 1
+          and t1.id = t2.user_id
+          and t2.role_id = t3.id
+    </select>
+
+    <update id="updateUserPwd">
+        update sys_user set password = #{password} , update_time = Now() where id = #{id}
+    </update>
+
+    <update id="updateUserGoogleSecretKey">
+        update sys_user set googlesecret = #{googlesecret} , update_time = Now(), is_bind_google = #{flag} where id = #{userId}
+    </update>
+
+    <update id="updateUserGoogelBindFlag">
+        update sys_user set is_bind_google = #{flag} , update_time = Now() where id = #{id}
+    </update>
+
+    <update id="updateUserInfo">
+        update sys_user set last_login_ip = #{lastLoginIp}, last_login_time = now(), login_count = #{loginCount}
+        where id = #{id}
+    </update>
+</mapper>

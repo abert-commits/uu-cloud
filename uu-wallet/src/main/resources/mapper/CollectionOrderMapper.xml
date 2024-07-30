@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.wallet.mapper.CollectionOrderMapper">
+
+    <select id="queryPayTotalNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from collection_order
+    </select>
+
+    <select id="queryPayFinishNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from collection_order where order_status = 7
+    </select>
+
+    <select id="queryPayNotCallNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from collection_order where trade_callback_status = 1
+    </select>
+
+    <select id="queryPayCallFailedNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from collection_order where (trade_callback_status = 5 or trade_callback_status =3)
+    </select>
+
+    <update id="updateOrderStatusById">
+        update collection_order set trade_callback_status = 2 where id = #{id}
+    </update>
+
+
+    <select id="getOrderByOrderNo"  resultType="org.uu.wallet.entity.CollectionOrder">
+        select * from collection_order where platform_order = #{orderNo}
+    </select>
+
+    <select id="queryPayCancelNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from collection_order where is_payment_cancelled = '1'
+    </select>
+
+    <select id="queryPayCancelOrderNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from collection_order where order_status = 8
+    </select>
+
+    <select id="merchantPaymentOrderNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from collection_order where order_status=3
+    </select>
+
+    <select id="queryPayCallFailedNumByName" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from merchant_collect_orders where (trade_callback_status = 5 or trade_callback_status =3) and merchant_name = #{name}
+    </select>
+
+    <select id="queryPayNotCallNumByName" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from merchant_collect_orders where trade_callback_status = 1  and merchant_name = #{name}
+    </select>
+
+    <select id="queryPayFinishNumByName" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from collection_order where order_status = 7 and merchant_name = #{name}
+    </select>
+
+    <select id="queryPayTotalNumByName" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from merchant_collect_orders where merchant_name = #{name}
+    </select>
+
+    <update id="updateCollectionByOrderNo">
+        UPDATE collection_order SET  update_time = now(), appeal_review_by = #{updateBy},
+                                 appeal_review_time = now(), completion_time = now(), actual_amount = #{actualAmount}, completed_by = #{updateBy}
+        WHERE platform_order = #{orderNo}
+    </update>
+
+    <select id="fetchTodayBuyInfoFuture" resultType="org.uu.wallet.vo.OrderInfoVo">
+        select IFNULL(sum(actual_amount),0) as actualAmount , count(1) as totalNum, IFNULL(sum(bonus),0) as totalCost from collection_order where
+            (order_status = 7 or order_status = 15) and  DATE_FORMAT(create_time,'%Y-%m-%d') = #{dateStr}
+    </select>
+
+    <select id="todayBuyInfoFuture" resultType="java.lang.Long">
+        select count(1) as totalNum from collection_order where
+            create_time >= #{dateStr}
+    </select>
+
+    <select id="fetchBuyTotalInfoFuture" resultType="org.uu.wallet.vo.OrderInfoVo">
+        select IFNULL(sum(actual_amount),0) as actualAmount , count(1) as totalNum, IFNULL(sum(bonus),0) as totalCost from collection_order where
+            (order_status = 7 or order_status = 15)
+    </select>
+
+    <select id="calcTodayPayAmount" resultType="java.math.BigDecimal">
+        select IFNULL(sum(amount),0) from merchant_collect_orders where merchant_name = #{name}
+                                                                 AND  order_status = 2
+                                                                 AND DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+    </select>
+
+    <select id="calcTodayPayCommission" resultType="java.math.BigDecimal">
+        select IFNULL(sum(cost),0) from merchant_collect_orders where merchant_name = #{name}
+                                                                    AND  order_status = 2
+                                                                    AND DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+    </select>
+
+    <select id="calcTodayPayFinishNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from merchant_collect_orders where merchant_name = #{name}
+                                                                  AND  order_status = 2
+                                                                  AND DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+    </select>
+
+    <select id="todayMerchantPayAmount" resultType="java.math.BigDecimal">
+        select IFNULL(sum(amount),0) from merchant_collect_orders where DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+                                                                           AND  order_status = 2
+    </select>
+
+    <select id="todayMerchantPayTransNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from merchant_collect_orders where DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+                                                                 AND  order_status = 2
+    </select>
+
+    <select id="merchantPayTotalAmount" resultType="java.math.BigDecimal">
+        select IFNULL(sum(amount),0) from merchant_collect_orders where  order_status = 2
+    </select>
+
+    <select id="merchantPayTransTotalNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from merchant_collect_orders where order_status = 2
+    </select>
+
+    <select id="todayMerchantPayTransTotalNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from merchant_collect_orders where order_status = 2 and DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+    </select>
+
+    <select id="todayMerchantPayCommission" resultType="java.math.BigDecimal">
+        select IFNULL(sum(cost),0) from merchant_collect_orders where  order_status = 2
+        and DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+    </select>
+
+    <select id="merchantPayTotalCommission" resultType="java.math.BigDecimal">
+        select IFNULL(sum(cost),0) from merchant_collect_orders where  order_status = 2
+    </select>
+
+    <select id="queryPayAppealTotalNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from appeal_order where appeal_type = 2
+    </select>
+
+
+
+
+</mapper>

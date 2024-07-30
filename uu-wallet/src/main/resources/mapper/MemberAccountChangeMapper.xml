@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.wallet.mapper.MemberAccountChangeMapper">
+    <update id="updateCommissionFlagByOrderNo">
+        UPDATE
+            member_account_change
+        SET
+            commission_flag = #{commissionFlag}
+        WHERE
+            order_no = #{orderNo}
+        AND
+            mid = #{memberId}
+        AND
+            change_type = #{changeType}
+    </update>
+
+    <select id="getTodayTradeConditionByMid" resultType="org.uu.wallet.dto.TodayAccountChangeDTO" parameterType="java.lang.String">
+        SELECT
+            SUM(CASE WHEN change_type IN (1, 2) THEN amount_change ELSE 0 END) AS today_trade_amount,
+            SUM(CASE WHEN change_type IN (8, 9, 14, 16) THEN amount_change ELSE 0 END) AS today_bonus
+        FROM
+            member_account_change
+        WHERE
+            mid = #{mid}
+         AND DATE(create_time) = CURDATE()
+          AND change_type IN (1, 2, 8, 9, 14, 16);
+    </select>
+
+    <select id="selectUpSumInfo" resultType="org.uu.wallet.entity.MemberAccountChange">
+        SELECT
+            IFNULL(sum(amount_change),0) as amountChange,
+            merchant_name as merchantName
+        FROM
+            member_account_change
+        WHERE
+            change_type = 4 and merchant_name <![CDATA[<> '']]>
+        GROUP BY merchant_name;
+    </select>
+
+    <select id="selectDownSumInfo" resultType="org.uu.wallet.entity.MemberAccountChange">
+        SELECT
+            IFNULL(sum(amount_change),0) as amountChange,
+            merchant_name as merchantName
+        FROM
+            member_account_change
+        WHERE
+            change_type = 7 and merchant_name <![CDATA[<> '']]>
+        GROUP BY merchant_name;
+    </select>
+
+    <select id="selectBuyBounsInfo" resultType="org.uu.wallet.entity.MemberAccountChange">
+        SELECT
+            IFNULL(sum(amount_change),0) as amountChange,
+            merchant_name as merchantName
+        FROM
+            member_account_change
+        WHERE
+            change_type = 8 and merchant_name <![CDATA[<> '']]>
+        GROUP BY merchant_name;
+    </select>
+
+    <select id="selectSellBounsInfo" resultType="org.uu.wallet.entity.MemberAccountChange">
+        SELECT
+            IFNULL(sum(amount_change),0) as amountChange,
+            merchant_name as merchantName
+        FROM
+            member_account_change
+        WHERE
+            change_type = 9 and merchant_name <![CDATA[<> '']]>
+        GROUP BY merchant_name;
+    </select>
+
+    <select id="selectBuyTeamBounsInfo" resultType="org.uu.wallet.entity.MemberAccountChange">
+        SELECT
+            IFNULL(sum(amount_change),0) as amountChange,
+            merchant_name as merchantName
+        FROM
+            member_account_change
+        WHERE
+            change_type = 15 and merchant_name <![CDATA[<> '']]>
+            and create_time &gt;= #{startTime}
+            and update_time &lt;= #{endTime}
+        GROUP BY merchant_name;
+    </select>
+
+    <select id="selectSellTeamBounsInfo" resultType="org.uu.wallet.entity.MemberAccountChange">
+        SELECT IFNULL(sum(amount_change), 0) as amountChange,
+               merchant_name                 as merchantName
+        FROM member_account_change
+        WHERE change_type = 18
+          and merchant_name <![CDATA[<> '']]>
+          and create_time &gt;= #{startTime}
+          and update_time &lt;= #{endTime}
+        GROUP BY merchant_name;
+    </select>
+
+    <select id="selectPlatformDividends" resultType="org.uu.wallet.entity.MemberAccountChange">
+        SELECT IFNULL(sum(amount_change), 0) as amountChange,
+               merchant_name                 as merchantName
+        FROM member_account_change
+        WHERE change_type = 16
+          and merchant_name <![CDATA[<> '']]>
+          and create_time &gt;= #{startTime}
+          and update_time &lt;= #{endTime}
+        GROUP BY merchant_name;
+    </select>
+</mapper>

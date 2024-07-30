@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.wallet.mapper.TaskCollectionRecordMapper">
+
+    <select id="getFinishNum" resultType="java.lang.Long">
+        SELECT IFNULL(count(DISTINCT member_id),0) from member_task_status  where completion_status = 1
+    </select>
+
+    <select id="getReceiveNum" resultType="java.lang.Long">
+        SELECT IFNULL(count(DISTINCT member_id),0) from task_collection_record where receive_type = 1
+    </select>
+
+    <select id="getRewardAmount" resultType="java.math.BigDecimal">
+        SELECT IFNULL(sum(reward_amount),0) from task_collection_record
+    </select>
+</mapper>

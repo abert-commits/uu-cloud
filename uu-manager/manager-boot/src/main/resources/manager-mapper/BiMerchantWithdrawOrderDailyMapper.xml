@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.manager.mapper.BiMerchantWithdrawOrderDailyMapper">
+    <update id="updateByDateTime">
+        INSERT INTO bi_merchant_withdraw_order_daily (
+        date_time,
+        money,
+        actual_money,
+        order_num,
+        success_order_num,
+        total_fee,
+        create_time,
+        update_time,
+        last_minute,
+        over_time_num,
+        cancel_match_num,
+        appeal_num,
+        continue_match_num,
+        match_duration,
+        finish_duration,
+        merchant_code,
+        merchant_name,
+        merchant_type
+        )
+        VALUES
+        (
+        #{vo.dateTime},
+        #{vo.money},
+        #{vo.actualMoney},
+        #{vo.orderNum},
+        #{vo.successOrderNum},
+        #{vo.totalFee},
+        now(),
+        now(),
+        #{vo.lastMinute},
+        #{vo.overTimeNum},
+        #{vo.cancelMatchNum},
+        #{vo.appealNum},
+        #{vo.continueMatchNum},
+        #{vo.matchDuration},
+        #{vo.finishDuration},
+        #{vo.merchantCode},
+        #{vo.merchantName},
+        #{vo.merchantType}
+        )
+        ON DUPLICATE KEY UPDATE
+        money = money + #{vo.money},
+        actual_money = actual_money + #{vo.actualMoney},
+        order_num = order_num + #{vo.orderNum},
+        success_order_num = success_order_num + #{vo.successOrderNum},
+        total_fee = total_fee + #{vo.totalFee},
+        over_time_num = over_time_num + #{vo.overTimeNum},
+        cancel_match_num = cancel_match_num + #{vo.cancelMatchNum},
+        appeal_num = appeal_num + #{vo.appealNum},
+        continue_match_num = continue_match_num + #{vo.continueMatchNum},
+        match_duration = match_duration + #{vo.matchDuration},
+        finish_duration = finish_duration + #{vo.finishDuration},
+        update_time = now()
+        <if test="vo.lastMinute != null and vo.lastMinute != ''">
+            ,last_minute = #{vo.lastMinute}
+        </if>
+    </update>
+
+    <delete id="deleteDailyByDateTime">
+        DELETE from bi_merchant_withdraw_order_daily where date_time = #{dateTime}
+    </delete>
+</mapper>

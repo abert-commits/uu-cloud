@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.manager.mapper.ManagerMerchantInfoMapper">
+
+
+    <resultMap id="BaseResultMap" type="org.uu.manager.entity.MerchantInfo">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="nickname" column="nickname" jdbcType="VARCHAR"/>
+
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
+        <result property="mobile" column="mobile" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="BOOLEAN"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="deleted" column="deleted" jdbcType="BOOLEAN"/>
+        <collection property="roles" ofType="string" javaType="list">
+            <result column="roleCode"></result>
+        </collection>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id
+        ,username,nickname,
+                gender,password,
+                avatar,mobile,status,
+                email,
+                deleted
+    </sql>
+
+    <resultMap id="MerchantAuthMap" type="org.uu.common.pay.dto.UserAuthDTO">
+        <id property="userId" column="userId" jdbcType="BIGINT"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="BOOLEAN"/>
+        <result property="googlesecret" column="googlesecret" jdbcType="VARCHAR"/>
+        <collection property="roles" ofType="string" javaType="list">
+            <result column="roleCode"></result>
+        </collection>
+    </resultMap>
+
+
+    <select id="getByUsername" resultMap="MerchantAuthMap">
+        select t1.id userId, t1.username,t1.googlesecret, t1.nickname, t1.password, t1.status, 'merchant' as roleCode
+        from merchant_info t1
+
+        where t1.username = #{userName}
+          and t1.deleted = 0
+
+    </select>
+
+    <select id="getMerchantInfoById" resultType="org.uu.manager.entity.MerchantInfo">
+       select id,code,balance  from  merchant_info where  code = #{code} for update
+
+    </select>
+
+    <update id="updateBalanceByCode" parameterType="org.uu.manager.entity.MerchantInfo">
+       update merchant_info set balance = balance
+
+    </update>
+
+
+</mapper>

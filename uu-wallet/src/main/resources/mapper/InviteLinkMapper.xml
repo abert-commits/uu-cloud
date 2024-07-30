@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.wallet.mapper.InviteLinkMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="org.uu.wallet.entity.InviteLink">
+        <id column="id" property="id"/>
+        <result column="ant_id" property="antId"/>
+        <result column="invite_code" property="inviteCode"/>
+        <result column="reward_ratio" property="rewardRatio"/>
+        <result column="default_link" property="defaultLink"/>
+        <result column="tree_flag" property="treeFlag"/>
+        <result column="level" property="level"/>
+        <result column="deleted" property="deleted"/>
+        <result column="total_commission_amount" property="totalCommissionAmount"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id
+        , ant_id AS antId, invite_code AS inviteCode, reward_ratio AS rewardRatio, tree_flag AS treeFlag, default_link AS defaultLink, deleted, total_commission_amount AS totalCommissionAmount, create_time AS createTime, update_time AS updateTime
+    </sql>
+
+</mapper>

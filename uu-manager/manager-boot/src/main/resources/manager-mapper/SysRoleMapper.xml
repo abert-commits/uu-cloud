@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.manager.mapper.SysRoleMapper">
+
+    <select id="selectOneByName" resultType="org.uu.manager.entity.SysRole">
+        SELECT * from sys_role where deleted = 1 and name = #{name}
+    </select>
+
+    <update id="updateRoleById">
+        update sys_role set deleted = 0 where id = #{id}
+    </update>
+</mapper>

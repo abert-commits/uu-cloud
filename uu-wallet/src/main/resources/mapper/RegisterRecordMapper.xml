@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.wallet.mapper.RegisterRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="org.uu.wallet.entity.RegisterRecord">
+        <id column="ant_id" property="antId" />
+        <result column="register_ip" property="registerIp" />
+        <result column="invite_code" property="inviteCode" />
+        <result column="register_time" property="registerTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        ant_id, register_ip, invite_code, register_time
+    </sql>
+
+</mapper>

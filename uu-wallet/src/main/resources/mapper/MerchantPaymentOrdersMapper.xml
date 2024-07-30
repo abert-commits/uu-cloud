@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.wallet.mapper.MerchantPaymentOrdersMapper">
+
+    <select id="selectWithdrawFuture" resultType="java.lang.Long">
+        SELECT
+            IFNULL( count( DISTINCT member_id ), 0 )
+        FROM
+            merchant_payment_orders
+        WHERE  order_status = 2
+    </select>
+
+    <select id="selectMerchantWithdrawNum" resultType="org.uu.wallet.entity.MemberInfo">
+        SELECT
+            IFNULL( count( DISTINCT member_id ), 0 ) as num,
+            merchant_code,merchant_name
+        FROM
+            merchant_payment_orders
+        WHERE  order_status = 2
+          and merchant_code <![CDATA[<> '']]>
+        GROUP BY merchant_code , merchant_name
+    </select>
+
+    <select id="selectCountGroupByCode" resultType="org.uu.wallet.entity.MerchantPaymentOrders">
+        SELECT
+            count( 1 ) AS amount,
+            merchant_code as merchantCode
+        FROM
+            merchant_payment_orders
+        WHERE
+            create_time <![CDATA[>=]]> #{startTime}
+          AND create_time <![CDATA[<=]]> #{endTime}
+        GROUP BY
+            merchant_code,
+            merchant_name
+    </select>
+
+    <select id="selectCostByDate" resultType="org.uu.wallet.entity.MemberInfo">
+
+
+        SELECT
+            IFNULL(sum( cost ),0) as balance,
+            merchant_code, merchant_name
+        FROM
+            merchant_payment_orders
+        GROUP BY merchant_code, merchant_name
+
+    </select>
+    <select id="getPaymentLastOrderCreditTime" resultType="org.uu.common.pay.dto.LastOrderWarnDTO">
+        SELECT
+            merchant_name,
+            max(create_time) AS lastOrderCreateTime
+        FROM
+            merchant_payment_orders
+        WHERE
+            merchant_name IS NOT NULL
+        GROUP BY
+            merchant_name
+    </select>
+</mapper>

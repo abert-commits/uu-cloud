@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.wallet.mapper.PaymentOrderMapper">
+
+    <select id="queryWithdrawTotalNum" resultType="java.lang.Long">
+        select IFNULL(count(1), 0) from payment_order
+    </select>
+
+    <select id="queryWithdrawFinishNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from payment_order where order_status = 7
+    </select>
+
+    <select id="queryWithdrawNotCallNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from payment_order where trade_callback_status = 1
+    </select>
+
+    <select id="queryWithdrawCallFailedNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from payment_order where (trade_callback_status = 5 or trade_callback_status =3)
+
+    </select>
+
+    <update id="updateOrderStatusById">
+        update payment_order set trade_callback_status = 2 where id = #{id}
+    </update>
+
+    <select id="withdrawOverTimeNumFuture" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from payment_order where match_timeout = 1
+    </select>
+
+    <select id="withdrawCancelMatchNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from payment_order where cancel_matching = 1
+    </select>
+
+    <select id="merchantCollectionOrderNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from payment_order where order_status=3
+    </select>
+
+    <update id="updateOrderStatusByOrderNo">
+        UPDATE payment_order SET order_status = #{orderStatus}, update_time = now() ,
+                                 completion_time = now(), update_by = #{updateBy} WHERE platform_order = #{orderNo}
+    </update>
+
+    <select id="queryWithdrawCallFailedNumByName" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from merchant_payment_orders where (trade_callback_status = 5 or trade_callback_status =3) and merchant_name=#{name}
+    </select>
+
+    <select id="queryWithdrawNotCallNumByName" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from merchant_payment_orders where trade_callback_status = 1 and merchant_name=#{name}
+    </select>
+
+    <select id="queryWithdrawFinishNumByName" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from payment_order where order_status = 7
+    </select>
+
+    <select id="queryWithdrawTotalNumByName" resultType="java.lang.Long">
+        select IFNULL(count(1), 0) from merchant_payment_orders where  merchant_name = #{name}
+    </select>
+
+    <update id="updateOrderByOrderNo">
+        UPDATE payment_order SET  update_time = now(),order_status = #{orderStatus}, appeal_review_by = #{updateBy},
+            appeal_review_time = now(), completion_time = now(), actual_amount = #{actualAmount}
+        WHERE platform_order = #{orderNo}
+    </update>
+
+    <update id="updatePaymentForFinish">
+        UPDATE payment_order SET order_status = #{orderStatus}, update_time = now(),completion_time = now(),
+            update_by = #{updateBy}
+        WHERE platform_order = #{orderNo}
+    </update>
+
+    <select id="fetchTodaySellInfoFuture" resultType="org.uu.wallet.vo.OrderInfoVo">
+        select IFNULL(sum(actual_amount),0) as actualAmount , count(1) as totalNum, IFNULL(sum(bonus),0) as totalCost from payment_order where
+            (order_status = 7 or order_status = 15) and  DATE_FORMAT(create_time,'%Y-%m-%d') = #{dateStr}
+    </select>
+
+    <select id="todaySellInfoFuture" resultType="java.lang.Long">
+        select count(1) as totalNum from payment_order where
+            create_time >= #{dateStr}
+    </select>
+
+    <select id="fetchSellTotalInfoFuture" resultType="org.uu.wallet.vo.OrderInfoVo">
+        select IFNULL(sum(actual_amount),0) as actualAmount , count(1) as totalNum, IFNULL(sum(bonus),0) as totalCost from payment_order where
+            (order_status = 7 or order_status = 15)
+    </select>
+
+    <select id="fetchTodayUsdtInfoFuture" resultType="org.uu.wallet.vo.OrderInfoVo">
+        select IFNULL(sum(usdt_num),0) as actualAmount from usdt_buy_order where `status` = 7 and  DATE_FORMAT(create_time,'%Y-%m-%d') = #{dateStr}
+    </select>
+
+    <select id="fetchUsdtTotalInfoFuture" resultType="org.uu.wallet.vo.OrderInfoVo">
+        select IFNULL(sum(usdt_num),0) as actualAmount , count(1) as totalNum from usdt_buy_order where `status` = 7
+    </select>
+
+    <select id="calcTodayWithdrawAmount" resultType="java.math.BigDecimal">
+        select IFNULL(sum(amount),0) from merchant_payment_orders where merchant_name = #{name}
+                                                                 AND  order_status = 2
+                                                                 AND DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+    </select>
+
+    <select id="calcTodayWithdrawCommission" resultType="java.math.BigDecimal">
+        select IFNULL(sum(cost),0) from merchant_payment_orders where merchant_name = #{name}
+                                                                    AND  order_status = 2
+                                                                    AND DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+    </select>
+
+    <select id="calcTodayWithdrawFinishNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from merchant_payment_orders where merchant_name = #{name}
+                                                                  AND  order_status = 2
+                                                                  AND DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+    </select>
+
+
+
+    <select id="todayMerchantWithdrawAmount" resultType="java.math.BigDecimal">
+        select IFNULL(sum(amount),0) from merchant_payment_orders where DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+                                                                    AND  order_status = 2
+    </select>
+
+    <select id="todayMerchantWithdrawTransNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from merchant_payment_orders where DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+                                                                 AND  order_status = 2
+    </select>
+
+    <select id="merchantWithdrawTotalAmount" resultType="java.math.BigDecimal">
+        select IFNULL(sum(amount),0) from merchant_payment_orders where  order_status = 2
+    </select>
+
+    <select id="merchantWithdrawTransTotalNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from merchant_payment_orders where order_status = 2
+    </select>
+
+    <select id="todayMerchantWithdrawTransTotalNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from merchant_payment_orders where order_status = 2
+                                                                 and DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+    </select>
+
+    <select id="todayMerchantWithdrawCommission" resultType="java.math.BigDecimal">
+        select IFNULL(sum(cost),0) from merchant_payment_orders where  order_status = 2
+                                                                  and DATE_FORMAT( create_time, '%Y-%m-%d' ) = #{dateStr}
+    </select>
+
+    <select id="merchantWithdrawTotalCommission" resultType="java.math.BigDecimal">
+        select IFNULL(sum(cost),0) from merchant_payment_orders where  order_status = 2
+    </select>
+
+    <select id="withdrawAppealTotalNum" resultType="java.lang.Long">
+        select IFNULL(count(1),0) from appeal_order where appeal_type = 1
+    </select>
+
+
+    <select id="getMemberUsdtInfo" resultType="org.uu.common.pay.dto.MemberOrderOverviewDTO">
+        select IFNULL(sum(usdt_num), 0) as usdtOrderAmount,
+        count(1) as usdtOrderNum
+        from usdt_buy_order
+        where status = 7
+        <if test="startTime != null and startTime != ''">
+            and create_time <![CDATA[>=]]> #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND create_time <![CDATA[<]]> #{endTime}
+        </if>
+    </select>
+</mapper>

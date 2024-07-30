@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.wallet.mapper.UsdtBuyOrderMapper">
+
+    <select id="selectSumInfo" resultType="org.uu.wallet.entity.UsdtBuyOrder">
+        SELECT
+            IFNULL(sum( arb_num ),0) as arbNum,
+            merchant_code as merchantCode,
+            merchant_name as merchantName
+        FROM
+            usdt_buy_order
+        WHERE merchant_code <![CDATA[<> '']]> and `status` = 7
+        GROUP BY merchant_code, merchant_name
+    </select>
+</mapper>

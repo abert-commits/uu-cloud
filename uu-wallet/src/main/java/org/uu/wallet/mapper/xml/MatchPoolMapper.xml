@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uu.wallet.mapper.MatchPoolMapper">
+    <select id="selectMatchSellOrderByAmount" resultType="org.uu.wallet.entity.MatchPool">
+        SELECT
+        match_order
+        FROM
+        match_pool
+        WHERE
+        order_status = 1
+        AND member_id != #{memberId}
+        AND remaining_amount &gt;= #{amount}
+        AND minimum_amount &lt; #{amount}
+        ORDER BY
+        remaining_amount - #{amount}
+        LIMIT 1
+    </select>
+</mapper>

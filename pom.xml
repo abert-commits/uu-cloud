@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.uu</groupId>
+    <artifactId>uu-cloud</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>uu-common</module>
+        <module>uu-gateway</module>
+        <module>uu-auth</module>
+        <module>uu-manager</module>
+        <module>uu-generator</module>
+        <module>uu-wallet</module>
+        <module>uu-chatroom</module>
+        <module>uu-job</module>
+        <module>uu-monitor</module>
+    </modules>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.5.4</version>
+        <relativePath/>
+    </parent>
+    <properties>
+        <spring-boot.version>2.5.4</spring-boot.version>
+        <spring-cloud.version>2020.0.3</spring-cloud.version>
+        <spring-cloud-alibaba.version>2021.1</spring-cloud-alibaba.version>
+        <uu.version>1.0-SNAPSHOT</uu.version>
+        <hutool.version>5.5.8</hutool.version>
+        <mysql.version>8.0.19</mysql.version>
+        <druid.version>1.2.4</druid.version>
+        <mybatis-plus.version>3.4.3</mybatis-plus.version>
+        <redisson.version>3.23.1</redisson.version>
+        <docker.host>http://192.168.64.2:2375</docker.host>
+        <docker.registry.repository> http://47.236.240.39:8088/arb-sit</docker.registry.repository>
+        <docker.maven.plugin.version>1.0.0</docker.maven.plugin.version>
+        <dockerfile.maven.version>1.3.7</dockerfile.maven.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+
+    </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <!--Spring Cloud 相关依赖-->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!--Spring Cloud & Alibaba 相关依赖-->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+
+        </dependencies>
+
+    </dependencyManagement>
+
+    <build>
+
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.5</version>
+                <executions>
+                    <execution>
+                        <id>process-META</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+
+                        <configuration>
+                            <outputDirectory>target/classes</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/src/main/resources/${activatedProperties}</directory>
+                                    <includes>
+                                        <include>logback-spring.xml</include>
+                                    </includes>
+                                </resource>
+                                <resource>
+                                    <directory>${basedir}/src/main/resources</directory>
+                                    <includes>
+                                        <include>manager-mapper/*</include>
+                                        <include>mapper/*</include>
+                                        <include>META-INF/spring.factories</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+     <!--       <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>${docker.maven.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>build-image</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <imageName>${docker.registry.repository}/${project.artifactId}:${project.version}</imageName>
+                    <dockerHost>${docker.host}</dockerHost>
+                    <baseImage>java:8</baseImage>
+                    <entryPoint>["java", "-jar","-Dspring.profiles.active=${activatedProperties}","/${project.build.finalName}.jar"]
+                    </entryPoint>
+                    <resources>
+                        <resource>
+                            <targetPath>/</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
+                </configuration>
+            </plugin>  -->
+
+        </plugins>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>bootstrap.yml</include>
+                    <include>application.yml</include>
+                </includes>
+            </resource>
+        </resources>
+
+
+
+    </build>
+
+
+    <!--配置测试开发生产环境-->
+    <profiles>
+        <profile>
+            <!--开发环境-->
+            <id>dev</id>
+            <!-- 加了这个，默认选中 -->
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <activatedProperties>dev</activatedProperties>
+                <nacosNamespace>d1ab2dc8-ff6f-403d-8e8b-9a5f0d451a0b</nacosNamespace>
+                <nacosAddress>http://127.0.0.1:8848</nacosAddress>
+                <nacosUserName>nacos</nacosUserName>
+                <nacosPassword>nacos</nacosPassword>
+            </properties>
+        </profile>
+        <profile>
+            <!--simon-->
+            <id>simon</id>
+            <properties>
+                <activatedProperties>simon</activatedProperties>
+                <nacosNamespace>1728add5-9b76-4a0b-ab52-7fdd5db9a412</nacosNamespace>
+                <nacosAddress>http://8.222.162.194:8848</nacosAddress>
+                <nacosUserName>nacos</nacosUserName>
+                <nacosPassword>nacos</nacosPassword>
+            </properties>
+        </profile>
+
+        <profile>
+            <!--pom-->
+            <id>pom</id>
+            <properties>
+                <activatedProperties>pom</activatedProperties>
+                <nacosNamespace>0f4d60bf-1daa-4e84-b238-0b80245d4f0c</nacosNamespace>
+                <nacosAddress>http://8.222.162.194:8848</nacosAddress>
+                <nacosUserName>nacos</nacosUserName>
+                <nacosPassword>nacos</nacosPassword>
+            </properties>
+        </profile>
+
+        <profile>
+            <!--hawkins-->
+            <id>hawkins</id>
+            <properties>
+                <activatedProperties>hawkins</activatedProperties>
+                <nacosNamespace>a7ea36ea-86ab-4dad-864d-a35e9d0b4e49</nacosNamespace>
+                <nacosAddress>http://8.222.162.194:8848</nacosAddress>
+                <nacosUserName>nacos</nacosUserName>
+                <nacosPassword>nacos</nacosPassword>
+            </properties>
+        </profile>
+
+        <profile>
+            <!--parker-->
+            <id>parker</id>
+            <properties>
+                <activatedProperties>parker</activatedProperties>
+                <nacosNamespace>3975044f-35b2-4c3e-b328-19c79b131b8c</nacosNamespace>
+                <nacosAddress>http://8.222.162.194:8848</nacosAddress>
+                <nacosUserName>nacos</nacosUserName>
+                <nacosPassword>nacos</nacosPassword>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>lukas</id>
+            <properties>
+                <activatedProperties>lukas</activatedProperties>
+                <nacosNamespace>9991e84a-f8c8-4e33-a153-5730d7c2c77e</nacosNamespace>
+                <nacosAddress>http://8.222.162.194:8848</nacosAddress>
+                <nacosUserName>nacos</nacosUserName>
+                <nacosPassword>nacos</nacosPassword>
+            </properties>
+        </profile>
+        <profile>
+            <!--测试环境-->
+            <id>test</id>
+            <properties>
+                <activatedProperties>test</activatedProperties>
+                <nacosNamespace>6d5cfc35-93d8-4222-8492-e4306b257e0f</nacosNamespace>
+                <nacosAddress>http://10.0.0.178:8848</nacosAddress>
+                <nacosUserName>nacos</nacosUserName>
+                <nacosPassword>nacos</nacosPassword>
+            </properties>
+        </profile>
+
+
+        <profile>
+            <id>sit</id>
+            <properties>
+                <activatedProperties>sit</activatedProperties>
+                <nacosNamespace>6d5cfc35-93d8-4222-8492-e4306b257e0f</nacosNamespace>
+                <nacosAddress>http://10.0.0.178:8848</nacosAddress>
+                <nacosUserName>nacos</nacosUserName>
+                <nacosPassword>nacos</nacosPassword>
+            </properties>
+        </profile>
+        <!--生产环境-->
+        <profile>
+            <id>prod</id>
+            <properties>
+                <activatedProperties>prod</activatedProperties>
+                <nacosNamespace>05c567b4-54db-4e70-aeb7-72a44d4d7945</nacosNamespace>
+                <nacosAddress>http://mse-0e54b9710-nacos-ans.mse.aliyuncs.com:8848</nacosAddress>
+                <nacosUserName></nacosUserName>
+                <nacosPassword></nacosPassword>
+            </properties>
+        </profile>
+
+        <profile>
+
+            <id>louis</id>
+            <properties>
+                <activatedProperties>louis</activatedProperties>
+                <nacosNamespace>78eef2e2-83b0-4efb-ad3a-73a08d590430</nacosNamespace>
+                <nacosAddress>http://8.222.162.194:8848</nacosAddress>
+                <nacosUserName>nacos</nacosUserName>
+                <nacosPassword>nacos</nacosPassword>
+            </properties>
+        </profile>
+
+        <profile>
+            <!--afei-->
+            <id>afei</id>
+            <properties>
+                <activatedProperties>afei</activatedProperties>
+                <nacosNamespace>54959cb0-bdae-40b0-94c5-a1aadf3add21</nacosNamespace>
+                <nacosAddress>http://8.222.162.194:8848</nacosAddress>
+                <nacosUserName>nacos</nacosUserName>
+                <nacosPassword>nacos</nacosPassword>
+            </properties>
+        </profile>
+
+    </profiles>
+
+
+
+</project>
