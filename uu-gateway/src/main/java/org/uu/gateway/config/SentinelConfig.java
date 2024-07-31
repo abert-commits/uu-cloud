@@ -3,7 +3,6 @@ package org.uu.gateway.config;
 import com.alibaba.csp.sentinel.adapter.gateway.sc.SentinelGatewayFilter;
 import com.alibaba.csp.sentinel.adapter.gateway.sc.callback.GatewayCallbackManager;
 import org.springframework.http.MediaType;
-import org.springframework.http.StreamingHttpOutputMessage;
 import org.uu.common.core.result.ResultCode;
 
 import org.springframework.context.annotation.Configuration;
@@ -34,12 +33,14 @@ public class SentinelConfig {
 
     @PostConstruct
     private void initBlockHandler() {
-        GatewayCallbackManager.setBlockHandler(((serverWebExchange, throwable) ->
-                ServerResponse.status(HttpStatus.TOO_MANY_REQUESTS)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(
-                                BodyInserters.fromValue(ResultCode.FLOW_LIMITING.toString())
-                        )
-        ));
+        GatewayCallbackManager.setBlockHandler(
+                (exchange, t) ->
+                        ServerResponse
+                                .status(HttpStatus.TOO_MANY_REQUESTS)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body(
+                                        BodyInserters.fromValue(ResultCode.FLOW_LIMITING.toString())
+                                )
+        );
     }
 }
